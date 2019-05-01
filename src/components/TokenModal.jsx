@@ -1,23 +1,33 @@
 import React from "react";
-import { Modal, Typography, Form, Input } from "antd";
-const { Paragraph } = Typography;
+import { Dialog, TextInputField } from "evergreen-ui";
 
 export default function TokenModal({ setToken }) {
   const [token, onTokenChange] = React.useState("");
   const [cancelled, setCancelled] = React.useState(false);
 
-  const onOk = () => {
-    token && setToken(token);
+  const onOk = e => {
+    e && e.preventDefault();
+    if (token) {
+      setCancelled(false);
+      setToken(token);
+    } else {
+      setCancelled(true);
+    }
   };
 
   return (
-    <Modal
+    <Dialog
       title="Enter a GitHub personal access token"
-      visible={true}
-      onOk={onOk}
+      isShown={true}
+      onConfirm={() => onOk()}
+      confirmLabel="Save"
+      hasCancel={false}
       onCancel={() => setCancelled(true)}
+      preventBodyScrolling={true}
+      shouldCloseOnOverlayClick={false}
+      shouldCloseOnEscapePress={false}
     >
-      <Paragraph>
+      <p>
         The app needs a personal access token for API requests. If you don't
         have a token, you can{" "}
         <a
@@ -26,24 +36,18 @@ export default function TokenModal({ setToken }) {
         >
           create one now
         </a>
-      </Paragraph>
-      <Form onSubmit={onOk}>
-        <Input
-          placeholder="personal access token"
-          size="large"
+      </p>
+      <form onSubmit={onOk}>
+        <TextInputField
+          label="Personal access token"
           onChange={e => onTokenChange(e.currentTarget.value)}
           required
+          isInvalid={cancelled && !token}
+          validationMessage={
+            cancelled && !token && "Access token cannot be empty"
+          }
         />
-      </Form>
-      {cancelled && (
-        <Paragraph
-          type="warning"
-          strong
-          style={{ marginTop: "1em", marginBottom: "0" }}
-        >
-          Access token cannot be empty
-        </Paragraph>
-      )}
-    </Modal>
+      </form>
+    </Dialog>
   );
 }

@@ -1,43 +1,101 @@
 import React from "react";
-import { Tabs, Input, Row, Col } from "antd";
-const { TabPane } = Tabs;
-const { Search } = Input;
+import * as _ from "lodash";
+import { SearchInput, Tablist, Tab, Pane, Paragraph } from "evergreen-ui";
 
 import TokenModal from "./TokenModal";
 import HierarchyDiagram from "../viz/HierarchyDiagram";
 import ChordDiagram from "../viz/ChordDiagram";
 
-export default class Home extends React.Component {
-  state = { org: "" };
+const tabs = ["teams", "languages", "repos"];
+const components = {
+  teams: HierarchyDiagram,
+  languages: ChordDiagram,
+  repos: () => <div>Repositories</div>
+};
+
+export default class Home extends React.PureComponent {
+  state = {
+    org: "",
+    selectedIndex: 0
+  };
+
+  selectTab(index) {
+    this.setState({ selectedIndex: index });
+  }
+
+  onOrgChange = e => {
+    if (e.key === "Enter" && e.target.value) {
+      this.setState({ org: e.target.value });
+    }
+  };
 
   render() {
+    const { org, selectedIndex } = this.state;
     const { token, setToken } = this.props;
-    const { org } = this.state;
 
     return !token ? (
       <TokenModal setToken={setToken} />
     ) : (
       <>
-        <Row>
-          <Col span={8} offset={8}>
-            <Search
-              size="large"
-              placeholder="Organisation"
-              onSearch={org => this.setState({ org })}
-              enterButton="Search"
-            />
-          </Col>
-        </Row>
-        <Row style={{ flex: "auto" }}>
-          <Tabs type="card" onChange={() => null}>
-            <TabPane tab="Teams" key="1">
-              {org && <HierarchyDiagram org={org} />}
-            </TabPane>
-            <TabPane tab="Languages" key="2">
-              {org && <ChordDiagram org={org} />}
-            </TabPane>
-          </Tabs>
-        </Row>
+        <Pane
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          paddingBottom={24}
+        >
+          <SearchInput
+            name="org"
+            placeholder="Organisation"
+            width={480}
+            height={48}
+            required
+            onKeyDown={this.onOrgChange}
+          />
+        </Pane>
+        <Pane
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          paddingBottom={24}
+        >
+          <Tablist>
+            {tabs.map((tab, index) => (
+              <Tab
+                key={tab}
+                id={tab}
+                onSelect={() => this.selectTab(index)}
+                isSelected={index === selectedIndex}
+                style={{
+                  padding: "20px 32px",
+                  fontSize: "0.8em",
+                  textTransform: "uppercase"
+                }}
+              >
+                {_.capitalize(tab)}
+              </Tab>
+            ))}
+          </Tablist>
+        </Pane>
+        <Pane
+          paddingTop={16}
+          background="tint1"
+          flex="1"
+          style={{ textAlign: "center" }}
+        >
+          {tabs.map((tab, index) => (
+            <Pane
+              key={tab}
+              id={`panel-${tab}`}
+              role="tabpanel"
+              aria-labelledby={tab}
+              aria-hidden={index !== selectedIndex}
+              display={index === selectedIndex ? "block" : "none"}
+              style={{ height: "100%" }}
+            >
+              {org && React.createElement(components[tab], { org, token })}
+            </Pane>
+          ))}
+        </Pane>
       </>
     );
   }

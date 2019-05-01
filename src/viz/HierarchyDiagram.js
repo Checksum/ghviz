@@ -1,10 +1,11 @@
 import React from "react";
-import * as d3 from "d3";
 import * as _ from "lodash";
 import * as fp from "lodash/fp";
-import { Popover, Spin, Alert, Row, Col } from "antd";
+import { Popover, Position } from "evergreen-ui";
 
 import makeFetcher from "../Api";
+import visualization from "./Visualization";
+import * as d3 from "../../lib/d3";
 
 const orgHierarchy = `
 query($org: String!) {
@@ -47,19 +48,6 @@ query($org: String!) {
   }
 }
 `;
-
-const fetcher = makeFetcher(orgHierarchy, (acc, data) => {
-  return new Promise((resolve, reject) => {
-    try {
-      const stepResults = processResponse(acc, data);
-      resolve({
-        results: stepResults
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
-});
 
 function processResponse(resultSet, data) {
   const teams = _.get(data, "data.organization.teams.nodes", []);
@@ -114,14 +102,16 @@ function processResponse(resultSet, data) {
   return levels;
 }
 
-export default class HierarchyDiagram extends React.Component {
+class HierarchyDiagram extends React.Component {
   state = {
-    loading: false,
     resultSet: [],
-    filtered: {},
-    hasError: false,
-    errorMessage: ""
+    filtered: {}
   };
+
+  constructor(props) {
+    super(props);
+    this.fetcher = makeFetcher(orgHierarchy, this.onFetch, props.token);
+  }
 
   componentDidMount() {
     this.fetch();
@@ -134,30 +124,36 @@ export default class HierarchyDiagram extends React.Component {
   }
 
   componentDidCatch(error) {
-    this.onError(error);
+    this.props.onError(error);
   }
 
-  onError = error => {
-    console.error(error);
-    this.setState({
-      hasError: true,
-      errorMessage: error.toString()
+  onFetch = (acc, data) => {
+    return new Promise((resolve, reject) => {
+      try {
+        const stepResults = processResponse(acc, data);
+        resolve({
+          results: stepResults
+        });
+      } catch (error) {
+        reject(error);
+      }
     });
   };
 
   fetch() {
-    const { org } = this.props;
-    this.setState({ loading: true, hasError: false });
+    const { org, setLoading, resetError, onError } = this.props;
+    resetError();
+    setLoading(true);
 
-    fetcher({ org }, [])
+    this.fetcher({ org }, [])
       .then(resultSet => {
         this.setState({
           resultSet,
-          filtered: HierarchyDiagram.build(resultSet),
-          loading: false
+          filtered: HierarchyDiagram.build(resultSet)
         });
+        setLoading(false);
       })
-      .catch(this.onError);
+      .catch(onError);
   }
 
   static build(data) {
@@ -322,6 +318,7 @@ export default class HierarchyDiagram extends React.Component {
 
     const layout = {
       height: d3.max(nodes, n => n.y) + node_height / 2 + 2 * padding,
+      width: d3.max(nodes, n => n.x) + node_width / 2 + 2 * padding,
       node_height,
       node_width,
       bundle_width,
@@ -357,25 +354,12 @@ export default class HierarchyDiagram extends React.Component {
   };
 
   render() {
-    const { loading, filtered, hasError, errorMessage } = this.state;
+    const { filtered } = this.state;
     const { bundles, nodes, layout } = filtered;
+    const { error } = this.props;
 
-    if (hasError) {
-      return (
-        <Row>
-          <Col span={8} offset={8}>
-            <Alert message={errorMessage} type="error" />
-          </Col>
-        </Row>
-      );
-    }
-
-    if (loading) {
-      return (
-        <div style={{ textAlign: "center", marginTop: "20vh" }}>
-          <Spin size="large" />
-        </div>
-      );
+    if (error) {
+      return null;
     }
 
     if (!(bundles && nodes)) {
@@ -386,7 +370,7 @@ export default class HierarchyDiagram extends React.Component {
 
     return (
       <svg
-        width="1200"
+        width="1100"
         height={layout.height}
         className="hierarchy-diagram"
         onClick={this.resetFilter}
@@ -437,7 +421,7 @@ export default class HierarchyDiagram extends React.Component {
             />
             {n.login ? (
               <Popover
-                placement="right"
+                position={Position.RIGHT}
                 title={n.id}
                 content={
                   <>
@@ -470,3 +454,5 @@ export default class HierarchyDiagram extends React.Component {
     );
   }
 }
+
+export default visualization(HierarchyDiagram);

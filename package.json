@@ -3,26 +3,33 @@
   "version": "0.1.0",
   "description": "Visualize and discover interesting GitHub repos",
   "main": "index.js",
+  "alias": {
+    "lodash": "./node_modules/lodash/lodash.min.js",
+    "lodash/fp": "./node_modules/lodash/fp",
+    "//@blueprintjs/icons": "./lib/blueprintIcons.js"
+  },
   "scripts": {
-    "dev": "parcel src/index.html",
-    "build": "NODE_ENV=production parcel build src/index.html --no-source-maps --detailed-report"
+    "start": "parcel src/index.html",
+    "build": "parcel build src/index.html --no-source-maps --detailed-report",
+    "prebuild": "rm -rf dist"
   },
   "author": "Srinath Sankar <srinath@iambot.net>",
   "license": "MIT",
   "dependencies": {
-    "antd": "^3.16.1",
     "d3": "^5.9.2",
+    "evergreen-ui": "^4.15.0",
     "lodash": "^4.17.11",
+    "normalize.css": "^8.0.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.0.0",
-    "react-use": "^8.1.1",
+    "react-use": "^8.3.1",
     "venn.js": "^0.2.20"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.3",
-    "@babel/plugin-proposal-class-properties": "^7.4.0",
-    "@babel/preset-env": "^7.4.3",
+    "@babel/core": "^7.4.4",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
     "@babel/preset-react": "^7.0.0",
     "parcel-bundler": "^1.12.3",
     "parcel-plugin-bundle-visualiser": "^1.2.0"

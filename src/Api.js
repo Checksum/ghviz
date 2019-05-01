@@ -1,10 +1,5 @@
-export default function makeFetcher(query, accumulator) {
+export default function makeFetcher(query, accumulator, token) {
   return function recursiveFetch(variables = {}, results = {}) {
-    let token = localStorage.getItem("ghviz:token");
-    try {
-      token = JSON.parse(token);
-    } catch {}
-
     return fetch("https://api.github.com/graphql", {
       method: "POST",
       body: JSON.stringify({

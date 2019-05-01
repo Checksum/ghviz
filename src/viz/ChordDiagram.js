@@ -1,10 +1,10 @@
 import React from "react";
-import * as d3 from "d3";
 import * as _ from "lodash";
 import * as fp from "lodash/fp";
-import { Spin, Alert, Row, Col } from "antd";
 
 import makeFetcher from "../Api";
+import visualization from "./Visualization";
+import * as d3 from "../../lib/d3";
 
 const orgLanguages = `
 query($org: String!, $count: Int = 100, $endCursor: String) {
@@ -88,18 +88,15 @@ function processResponse(languageSet, data) {
   )(repos);
 }
 
-export default class ChordDiagram extends React.Component {
+class ChordDiagram extends React.Component {
   node = null;
   state = {
-    loading: false,
-    hasError: false,
-    errorMessage: "",
     languageSet: {}
   };
 
   constructor(props) {
     super(props);
-    this.fetcher = makeFetcher(orgLanguages, this.onFetch);
+    this.fetcher = makeFetcher(orgLanguages, this.onFetch, props.token);
   }
 
   componentDidMount() {
@@ -113,18 +110,6 @@ export default class ChordDiagram extends React.Component {
       });
     }
   }
-
-  componentDidCatch(error) {
-    this.onError(error);
-  }
-
-  onError = error => {
-    console.error(error);
-    this.setState({
-      hasError: true,
-      errorMessage: error.toString()
-    });
-  };
 
   onFetch = (acc, data) => {
     return new Promise((resolve, reject) => {
@@ -143,18 +128,19 @@ export default class ChordDiagram extends React.Component {
   };
 
   fetch() {
-    const { org } = this.props;
-    this.setState({ loading: true, hasError: false });
+    const { org, setLoading, resetError, onError } = this.props;
+    setLoading(true);
+    resetError();
 
     this.fetcher({ org }, this.state.languageSet)
       .then(languageSet => {
         this.setState({
-          languageSet,
-          loading: false
+          languageSet
         });
+        setLoading(false);
         this.draw(languageSet);
       })
-      .catch(this.onError);
+      .catch(onError);
   }
 
   draw(data) {
@@ -258,26 +244,12 @@ export default class ChordDiagram extends React.Component {
   }
 
   render() {
-    const { loading, hasError, errorMessage } = this.state;
     const width = 800;
     const height = 800;
+    const { error } = this.props;
 
-    if (hasError) {
-      return (
-        <Row>
-          <Col span={8} offset={8}>
-            <Alert message={errorMessage} type="error" />
-          </Col>
-        </Row>
-      );
-    }
-
-    if (loading) {
-      return (
-        <div style={{ textAlign: "center", marginTop: "20vh" }}>
-          <Spin size="large" />
-        </div>
-      );
+    if (error) {
+      return null;
     }
 
     return (
@@ -292,3 +264,5 @@ export default class ChordDiagram extends React.Component {
     );
   }
 }
+
+export default visualization(ChordDiagram);
