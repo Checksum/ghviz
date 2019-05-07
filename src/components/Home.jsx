@@ -45,7 +45,7 @@ export default class Home extends React.PureComponent {
         >
           <SearchInput
             name="org"
-            placeholder="Organisation"
+            placeholder="Organization handle"
             width={480}
             height={48}
             required

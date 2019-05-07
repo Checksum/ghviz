@@ -29,7 +29,7 @@
   height: 40px;
 
   position: relative;
-  margin: 100px auto;
+  display: inline-block;
 }
 
 .double-bounce1,

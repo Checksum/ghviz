@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Spinner, Pane } from "evergreen-ui";
+import { Alert, Pane } from "evergreen-ui";
 
 export default function visualization(WrappedComponent) {
   class Visualization extends React.PureComponent {
@@ -73,14 +73,16 @@ export default function visualization(WrappedComponent) {
             <Pane
               style={{
                 position: "absolute",
-                top: 0,
-                bottom: 0,
+                top: 20,
                 left: 0,
                 right: 0,
-                background: "rgba(0, 0, 0, 0.1)"
+                textAlign: "center"
               }}
             >
-              <Spinner size={64} marginX="auto" marginY="20%" />
+              <div className="spinner">
+                <div className="double-bounce1" />
+                <div className="double-bounce2" />
+              </div>
             </Pane>
           ) : null}
           {React.cloneElement(this.wrapped, {
