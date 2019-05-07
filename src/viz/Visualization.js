@@ -58,7 +58,11 @@ export default function visualization(WrappedComponent) {
             justifyContent="center"
             height={320}
           >
-            <Alert intent="danger" title={error.toString()} />
+            <Alert
+              appearance="card"
+              intent="danger"
+              title={error.toString().replace(/^error:\s?/i, "")}
+            />
           </Pane>
         );
       }
@@ -67,12 +71,16 @@ export default function visualization(WrappedComponent) {
         <>
           {!ready || loading ? (
             <Pane
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              height={400}
+              style={{
+                position: "absolute",
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                background: "rgba(0, 0, 0, 0.1)"
+              }}
             >
-              <Spinner size={64} />
+              <Spinner size={64} marginX="auto" marginY="20%" />
             </Pane>
           ) : null}
           {React.cloneElement(this.wrapped, {

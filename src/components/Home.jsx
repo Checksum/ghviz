@@ -76,12 +76,7 @@ export default class Home extends React.PureComponent {
             ))}
           </Tablist>
         </Pane>
-        <Pane
-          paddingTop={16}
-          background="tint1"
-          flex="1"
-          style={{ textAlign: "center" }}
-        >
+        <Pane background="tint1" flex="1" style={{ textAlign: "center" }}>
           {tabs.map((tab, index) => (
             <Pane
               key={tab}
@@ -90,7 +85,7 @@ export default class Home extends React.PureComponent {
               aria-labelledby={tab}
               aria-hidden={index !== selectedIndex}
               display={index === selectedIndex ? "block" : "none"}
-              style={{ height: "100%" }}
+              style={{ position: "relative", height: "100%" }}
             >
               {org && React.createElement(components[tab], { org, token })}
             </Pane>
