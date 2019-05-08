@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Pane } from "evergreen-ui";
+import { Alert, Pane, Spinner } from "evergreen-ui";
 
 export default function visualization(WrappedComponent) {
   class Visualization extends React.PureComponent {
@@ -71,12 +71,17 @@ export default function visualization(WrappedComponent) {
         <>
           {!ready || loading ? (
             <Pane
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
               style={{
-                position: "absolute",
-                top: 20,
+                position: "fixed",
+                top: 0,
+                bottom: 0,
                 left: 0,
                 right: 0,
-                textAlign: "center"
+                background: "rgba(0, 0, 0, 0.15)",
+                zIndex: 100
               }}
             >
               <div className="spinner">

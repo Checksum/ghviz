@@ -1,7 +1,7 @@
 import React from "react";
 import * as _ from "lodash";
 import * as fp from "lodash/fp";
-import { Popover, Position } from "evergreen-ui";
+import { Position, Pane, Button, Popover } from "evergreen-ui";
 
 import makeFetcher from "../Api";
 import visualization from "./Visualization";
@@ -335,6 +335,12 @@ class HierarchyDiagram extends React.Component {
     };
   }
 
+  setFilteredNodes = nodes => {
+    this.setState({
+      filtered: HierarchyDiagram.build(nodes)
+    });
+  };
+
   filterByNode = (event, node) => {
     event.stopPropagation();
     const currentRootNodes = this.state.filtered.nodes;
@@ -343,18 +349,16 @@ class HierarchyDiagram extends React.Component {
       // node.id !== currentRootNodes[0].id &&
       node.members
     ) {
-      this.setState({
-        filtered: HierarchyDiagram.build([[{ id: node.id }], node.members])
-      });
+      this.setFilteredNodes([[{ id: node.id }], node.members]);
     }
   };
 
   resetFilter = () => {
-    this.setState({ filtered: HierarchyDiagram.build(this.state.resultSet) });
+    this.setFilteredNodes(this.state.resultSet);
   };
 
   render() {
-    const { filtered } = this.state;
+    const { filtered, focusedNode } = this.state;
     const { bundles, nodes, layout } = filtered;
     const { error } = this.props;
 
@@ -422,21 +426,29 @@ class HierarchyDiagram extends React.Component {
             {n.login ? (
               <Popover
                 position={Position.RIGHT}
-                title={n.id}
                 content={
-                  <>
-                    <img src={n.avatarUrl} width={32} height={32} />
-                    <span>@{n.login}</span>
-                  </>
+                  <Pane paddingX={8} paddingY={8}>
+                    <img
+                      src={n.avatarUrl}
+                      width={32}
+                      height={32}
+                      style={{ verticalAlign: "middle" }}
+                    />
+                    <span style={{ marginLeft: 8 }}>@{n.login}</span>
+                  </Pane>
                 }
               >
-                <text
-                  x={n.x + 4}
-                  y={n.y - n.height / 2 - 4}
-                  onClick={e => this.filterByNode(e, n)}
-                >
-                  {n.id}
-                </text>
+                {({ toggle, getRef }) => (
+                  <text
+                    ref={el => getRef(el)}
+                    onMouseEnter={toggle}
+                    onMouseLeave={toggle}
+                    x={n.x + 4}
+                    y={n.y - n.height / 2 - 4}
+                  >
+                    {n.id}
+                  </text>
+                )}
               </Popover>
             ) : (
               <text
