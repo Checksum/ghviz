@@ -40,21 +40,28 @@ const TABS = [
 export default class Home extends React.PureComponent {
   state = {
     org: "",
-    selectedIndex: 0
+    selectedIndex: 0,
+    visitedTabs: new Set([0])
   };
 
   selectTab(index) {
-    this.setState({ selectedIndex: index });
+    this.setState(({ visitedTabs }) => ({
+      selectedIndex: index,
+      visitedTabs: visitedTabs.add(index)
+    }));
   }
 
   onOrgChange = e => {
     if (e.key === "Enter" && e.target.value) {
-      this.setState({ org: e.target.value });
+      this.setState({
+        org: e.target.value,
+        visitedTabs: new Set([this.state.selectedIndex])
+      });
     }
   };
 
   render() {
-    const { org, selectedIndex } = this.state;
+    const { org, selectedIndex, visitedTabs } = this.state;
     const { token, setToken } = this.props;
 
     return !token ? (
@@ -111,7 +118,9 @@ export default class Home extends React.PureComponent {
                   <Heading size={600}>{_.capitalize(tab.name)}</Heading>
                   {tab.description || null}
                 </Pane>
-                {org && React.createElement(tab.component, { org, token })}
+                {org &&
+                  visitedTabs.has(index) &&
+                  React.createElement(tab.component, { org, token })}
               </Pane>
             ))}
           </Pane>
