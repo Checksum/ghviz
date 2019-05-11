@@ -118,7 +118,11 @@ class ChordDiagram extends React.Component {
       .fetch(() =>
         this.fetcher({ org: this.props.org }, this.state.languageSet)
       )
-      .then(this.onFetchEnd);
+      .then(languageSet => {
+        if (languageSet) {
+          this.onFetchEnd(languageSet);
+        }
+      });
   };
 
   onFetchStep = (acc, data) => {

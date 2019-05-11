@@ -132,7 +132,11 @@ class HierarchyDiagram extends React.Component {
   fetch = () => {
     return this.props
       .fetch(() => this.fetcher({ org: this.props.org }, []))
-      .then(this.onFetchEnd);
+      .then(resultSet => {
+        if (resultSet) {
+          this.onFetchEnd(resultSet);
+        }
+      });
   };
 
   onFetchStep = (acc, data) => {
