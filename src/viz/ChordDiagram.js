@@ -4,7 +4,6 @@ import * as fp from "lodash/fp";
 
 import makeFetcher from "../Api";
 import visualization from "./Visualization";
-import * as d3 from "../../lib/d3";
 
 const orgLanguages = `
 query($org: String!, $count: Int = 100, $endCursor: String) {
@@ -91,19 +90,22 @@ function processResponse(languageSet, data) {
 class ChordDiagram extends React.Component {
   node = null;
   state = {
+    d3: null,
     languageSet: {}
   };
 
   constructor(props) {
     super(props);
-    this.fetcher = makeFetcher(orgLanguages, this.onFetch, props.token);
+    this.fetcher = makeFetcher(orgLanguages, this.onFetchStep, props.token);
   }
 
   componentDidMount() {
-    this.fetch();
+    import("../../lib/d3").then(d3 => {
+      this.setState({ d3 }, this.fetch);
+    });
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     if (this.props.org !== prevProps.org) {
       this.setState({ languageSet: {} }, () => {
         this.fetch();
@@ -111,7 +113,15 @@ class ChordDiagram extends React.Component {
     }
   }
 
-  onFetch = (acc, data) => {
+  fetch = () => {
+    return this.props
+      .fetch(() =>
+        this.fetcher({ org: this.props.org }, this.state.languageSet)
+      )
+      .then(this.onFetchEnd);
+  };
+
+  onFetchStep = (acc, data) => {
     return new Promise((resolve, reject) => {
       try {
         const stepResults = processResponse(acc, data);
@@ -127,24 +137,20 @@ class ChordDiagram extends React.Component {
     });
   };
 
-  fetch() {
-    const { org, setLoading, resetError, onError } = this.props;
-    setLoading(true);
-    resetError();
-
-    this.fetcher({ org }, this.state.languageSet)
-      .then(languageSet => {
-        this.setState({
-          languageSet
-        });
-        setLoading(false);
+  onFetchEnd = languageSet => {
+    this.setState(
+      {
+        languageSet
+      },
+      () => {
         this.draw(languageSet);
-      })
-      .catch(onError);
-  }
+      }
+    );
+  };
 
   draw(data) {
-    if (!this.node) {
+    const d3 = this.state.d3;
+    if (!this.node || !d3) {
       return;
     }
     const width = 800;
@@ -247,8 +253,9 @@ class ChordDiagram extends React.Component {
     const width = 800;
     const height = 800;
     const { error } = this.props;
+    const { d3 } = this.state;
 
-    if (error) {
+    if (error || !d3) {
       return null;
     }
 

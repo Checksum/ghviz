@@ -14,13 +14,10 @@ export default function visualization(WrappedComponent) {
       this.wrapped = React.createElement(WrappedComponent, {
         setLoading: this.setLoading,
         resetError: this.resetError,
-        onError: this.onError
+        onError: this.onError,
+        fetch: this.fetch
       });
     }
-
-    // componentDidMount() {
-    //   // import("../../lib/d3").then(() => this.setState({ ready: true }));
-    // }
 
     componentDidUpdate(nextProps, nextState) {
       if (nextProps.org !== this.props.org) {
@@ -45,6 +42,17 @@ export default function visualization(WrappedComponent) {
 
     resetError = () => {
       this.setState({ error: null });
+    };
+
+    fetch = fetcher => {
+      this.resetError();
+      this.setLoading(true);
+      return fetcher()
+        .then(res => {
+          this.setLoading(false);
+          return res;
+        })
+        .catch(this.onError);
     };
 
     render() {

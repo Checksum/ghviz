@@ -5,7 +5,6 @@ import { Position, Pane, Button, Popover } from "evergreen-ui";
 
 import makeFetcher from "../Api";
 import visualization from "./Visualization";
-import * as d3 from "../../lib/d3";
 
 const orgHierarchy = `
 query($org: String!) {
@@ -104,20 +103,23 @@ function processResponse(resultSet, data) {
 
 class HierarchyDiagram extends React.Component {
   state = {
+    d3: null,
     resultSet: [],
     filtered: {}
   };
 
   constructor(props) {
     super(props);
-    this.fetcher = makeFetcher(orgHierarchy, this.onFetch, props.token);
+    this.fetcher = makeFetcher(orgHierarchy, this.onFetchStep, props.token);
   }
 
   componentDidMount() {
-    this.fetch();
+    import("../../lib/d3").then(d3 => {
+      this.setState({ d3 }, this.fetch);
+    });
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     if (this.props.org !== prevProps.org) {
       this.fetch();
     }
@@ -127,7 +129,13 @@ class HierarchyDiagram extends React.Component {
     this.props.onError(error);
   }
 
-  onFetch = (acc, data) => {
+  fetch = () => {
+    return this.props
+      .fetch(() => this.fetcher({ org: this.props.org }, []))
+      .then(this.onFetchEnd);
+  };
+
+  onFetchStep = (acc, data) => {
     return new Promise((resolve, reject) => {
       try {
         const stepResults = processResponse(acc, data);
@@ -140,23 +148,14 @@ class HierarchyDiagram extends React.Component {
     });
   };
 
-  fetch() {
-    const { org, setLoading, resetError, onError } = this.props;
-    resetError();
-    setLoading(true);
+  onFetchEnd = resultSet => {
+    this.setState({
+      resultSet,
+      filtered: HierarchyDiagram.build(resultSet, this.state.d3)
+    });
+  };
 
-    this.fetcher({ org }, [])
-      .then(resultSet => {
-        this.setState({
-          resultSet,
-          filtered: HierarchyDiagram.build(resultSet)
-        });
-        setLoading(false);
-      })
-      .catch(onError);
-  }
-
-  static build(data) {
+  static build(data, d3) {
     let levels = _.cloneDeep(data);
     // precompute level depth
     levels.forEach((l, i) => l.forEach(n => (n.level = i)));
@@ -337,7 +336,7 @@ class HierarchyDiagram extends React.Component {
 
   setFilteredNodes = nodes => {
     this.setState({
-      filtered: HierarchyDiagram.build(nodes)
+      filtered: HierarchyDiagram.build(nodes, this.state.d3)
     });
   };
 
@@ -358,7 +357,7 @@ class HierarchyDiagram extends React.Component {
   };
 
   render() {
-    const { filtered, focusedNode } = this.state;
+    const { d3, filtered, focusedNode } = this.state;
     const { bundles, nodes, layout } = filtered;
     const { error } = this.props;
 
