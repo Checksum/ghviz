@@ -31,7 +31,7 @@ export default function TokenModal({ setToken }) {
         The app needs a personal access token for API requests. If you don't
         have a token, you can{" "}
         <a
-          href="https://github.com/settings/tokens/new?description=ghviz&scopes=public_repo,read:org,read:discussion"
+          href="https://github.com/settings/tokens/new?description=ghviz&scopes=repo,read:org,read:discussion"
           target="_blank"
         >
           create one now
