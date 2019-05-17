@@ -90,7 +90,6 @@ function processResponse(languageSet, data) {
 class ChordDiagram extends React.Component {
   node = null;
   state = {
-    d3: null,
     languageSet: {}
   };
 
@@ -100,9 +99,7 @@ class ChordDiagram extends React.Component {
   }
 
   componentDidMount() {
-    import("../../lib/d3").then(d3 => {
-      this.setState({ d3 }, this.fetch);
-    });
+    this.fetch();
   }
 
   componentDidUpdate(prevProps) {
@@ -153,7 +150,7 @@ class ChordDiagram extends React.Component {
   };
 
   draw(data) {
-    const d3 = this.state.d3;
+    const d3 = this.props.d3;
     if (!this.node || !d3) {
       return;
     }
@@ -256,8 +253,7 @@ class ChordDiagram extends React.Component {
   render() {
     const width = 800;
     const height = 800;
-    const { error } = this.props;
-    const { d3 } = this.state;
+    const { d3, error } = this.props;
 
     if (error || !d3) {
       return null;

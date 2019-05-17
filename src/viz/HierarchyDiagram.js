@@ -103,7 +103,6 @@ function processResponse(resultSet, data) {
 
 class HierarchyDiagram extends React.Component {
   state = {
-    d3: null,
     resultSet: [],
     filtered: {}
   };
@@ -114,9 +113,7 @@ class HierarchyDiagram extends React.Component {
   }
 
   componentDidMount() {
-    import("../../lib/d3").then(d3 => {
-      this.setState({ d3 }, this.fetch);
-    });
+    this.fetch();
   }
 
   componentDidUpdate(prevProps) {
@@ -155,7 +152,7 @@ class HierarchyDiagram extends React.Component {
   onFetchEnd = resultSet => {
     this.setState({
       resultSet,
-      filtered: HierarchyDiagram.build(resultSet, this.state.d3)
+      filtered: HierarchyDiagram.build(resultSet, this.props.d3)
     });
   };
 
@@ -340,7 +337,7 @@ class HierarchyDiagram extends React.Component {
 
   setFilteredNodes = nodes => {
     this.setState({
-      filtered: HierarchyDiagram.build(nodes, this.state.d3)
+      filtered: HierarchyDiagram.build(nodes, this.props.d3)
     });
   };
 
@@ -361,9 +358,9 @@ class HierarchyDiagram extends React.Component {
   };
 
   render() {
-    const { d3, filtered, focusedNode } = this.state;
+    const { filtered, focusedNode } = this.state;
     const { bundles, nodes, layout } = filtered;
-    const { error } = this.props;
+    const { d3, error } = this.props;
 
     if (error) {
       return null;

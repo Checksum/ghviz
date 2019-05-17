@@ -6,7 +6,8 @@ export default function visualization(WrappedComponent) {
     state = {
       loading: false,
       ready: true,
-      error: null
+      error: null,
+      d3: null
     };
 
     constructor(props) {
@@ -16,6 +17,12 @@ export default function visualization(WrappedComponent) {
         resetError: this.resetError,
         onError: this.onError,
         fetch: this.fetch
+      });
+    }
+
+    componentDidMount() {
+      import("../../lib/d3").then(d3 => {
+        this.setState({ d3 });
       });
     }
 
@@ -56,7 +63,7 @@ export default function visualization(WrappedComponent) {
     };
 
     render() {
-      const { loading, ready, error } = this.state;
+      const { d3, loading, ready, error } = this.state;
 
       if (error) {
         return (
@@ -100,6 +107,7 @@ export default function visualization(WrappedComponent) {
           ) : null}
           {React.cloneElement(this.wrapped, {
             ...this.props,
+            d3,
             loading,
             error
           })}
