@@ -6,7 +6,7 @@
   "alias": {
     "lodash": "./node_modules/lodash/lodash.min.js",
     "lodash/fp": "./node_modules/lodash/fp",
-    "//@blueprintjs/icons": "./lib/blueprintIcons.js"
+    "@blueprintjs/icons": "./lib/blueprintIcons.js"
   },
   "scripts": {
     "start": "parcel src/index.html",
@@ -17,19 +17,19 @@
   "license": "MIT",
   "dependencies": {
     "d3": "^5.9.2",
-    "evergreen-ui": "^4.15.0",
-    "lodash": "^4.17.13",
+    "evergreen-ui": "^4.18.1",
+    "lodash": "^4.17.15",
     "normalize.css": "^8.0.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-router-dom": "^5.0.0",
-    "react-use": "^8.3.1",
+    "react-router-dom": "^5.0.1",
+    "react-use": "^10.3.0",
     "venn.js": "^0.2.20"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.4",
-    "@babel/plugin-proposal-class-properties": "^7.4.4",
-    "@babel/preset-env": "^7.4.4",
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
     "parcel-bundler": "^1.12.3",
     "parcel-plugin-bundle-visualiser": "^1.2.0"
