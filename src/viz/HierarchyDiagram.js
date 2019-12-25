@@ -1,7 +1,7 @@
 import React from "react";
 import * as _ from "lodash";
 import * as fp from "lodash/fp";
-import { Position, Pane, Button, Popover } from "evergreen-ui";
+import { Position, Pane, Popover } from "evergreen-ui";
 
 import makeFetcher from "../Api";
 import visualization from "./Visualization";

@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Pane, Spinner } from "evergreen-ui";
+import { Alert, Pane } from "evergreen-ui";
 
 export default function visualization(WrappedComponent) {
   class Visualization extends React.PureComponent {

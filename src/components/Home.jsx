@@ -4,9 +4,7 @@ import {
   SearchInput,
   Tablist,
   SidebarTab,
-  Tab,
   Pane,
-  Paragraph,
   Heading,
   Text
 } from "evergreen-ui";
