@@ -6,19 +6,15 @@ import {
   SidebarTab,
   Pane,
   Heading,
-  Text
+  Text,
+  Icon
 } from "evergreen-ui";
 
-import TokenModal from "./TokenModal";
+import { fetch } from "../Api";
 import HierarchyDiagram from "../viz/HierarchyDiagram";
 import ChordDiagram from "../viz/ChordDiagram";
 
 const TABS = [
-  {
-    name: "teams",
-    description: <Text>Click on a team to see its members</Text>,
-    component: HierarchyDiagram
-  },
   {
     name: "languages",
     description: (
@@ -29,15 +25,32 @@ const TABS = [
     component: ChordDiagram
   },
   {
+    name: "teams",
+    description: <Text>Click on a team to see its members</Text>,
+    component: HierarchyDiagram,
+    filter: ({ type }) => type === "Organization"
+  },
+  {
     name: "repos",
-    description: <Text>Repositories you contribute to</Text>,
-    component: () => <div>Repositories</div>
+    description: <Text>Repositories that you </Text>,
+    component: () => <div>Repositories</div>,
+    filter: ({ type }) => type === "Organization"
   }
 ];
+
+const ownerQuery = `
+query($owner: String!) {
+  repositoryOwner(login: $owner) {
+    id
+    __typename
+  }
+}
+`;
 
 export default class Home extends React.PureComponent {
   state = {
     org: "",
+    type: "",
     selectedIndex: 0,
     visitedTabs: new Set([0])
   };
@@ -50,21 +63,34 @@ export default class Home extends React.PureComponent {
   }
 
   onOrgChange = e => {
-    if (e.key === "Enter" && e.target.value) {
-      this.setState({
-        org: e.target.value,
-        visitedTabs: new Set([this.state.selectedIndex])
+    const owner = e.target.value;
+    if (e.key === "Enter" && owner) {
+      fetch({
+        query: ownerQuery,
+        token: this.props.token,
+        variables: { owner }
+      }).then(res => {
+        const type = res.data.repositoryOwner.__typename;
+        this.setState(prevState => {
+          const selectedIndex =
+            prevState.type === type ? prevState.selectedIndex : 0;
+          return {
+            org: owner,
+            type,
+            visitedTabs: new Set([selectedIndex]),
+            selectedIndex: selectedIndex
+          };
+        });
       });
     }
   };
 
   render() {
-    const { org, selectedIndex, visitedTabs } = this.state;
-    const { token, setToken } = this.props;
+    const { org, selectedIndex, visitedTabs, type } = this.state;
+    const { token } = this.props;
+    const icon = type && (type === "Organization" ? "office" : "user");
 
-    return !token ? (
-      <TokenModal setToken={setToken} />
-    ) : (
+    return (
       <>
         <Pane
           display="flex"
@@ -74,12 +100,15 @@ export default class Home extends React.PureComponent {
         >
           <SearchInput
             name="org"
-            placeholder="GitHub organization"
-            width={480}
+            placeholder="GitHub Organization or User"
+            width={360}
             height={48}
             required
             onKeyDown={this.onOrgChange}
           />
+          {icon && (
+            <Icon icon={icon} size={24} style={{ marginLeft: "10px" }} />
+          )}
         </Pane>
         <Pane display="flex" flex="1">
           <Tablist flexBasis={240}>
@@ -95,6 +124,7 @@ export default class Home extends React.PureComponent {
                   fontSize: "0.8em",
                   textTransform: "uppercase"
                 }}
+                disabled={tab.filter ? !tab.filter(this.state) : false}
               >
                 {_.capitalize(tab.name)}
               </SidebarTab>

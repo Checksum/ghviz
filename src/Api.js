@@ -1,6 +1,26 @@
-export default function makeFetcher(query, accumulator, token) {
+export default function makeFetcher({ query, accumulator, token }) {
   return function recursiveFetch(variables = {}, results = {}) {
-    return fetch("https://api.github.com/graphql", {
+    return fetch({ token, query, variables }).then(data => {
+      return accumulator(results, data).then(merged => {
+        const { hasNextPage, endCursor } = merged.pageInfo || {};
+        if (hasNextPage) {
+          return recursiveFetch(
+            {
+              ...variables,
+              endCursor
+            },
+            merged.results
+          );
+        }
+        return merged.results;
+      });
+    });
+  };
+}
+
+export function fetch({ token, query, variables }) {
+  return window
+    .fetch("https://api.github.com/graphql", {
       method: "POST",
       body: JSON.stringify({
         query,
@@ -11,21 +31,5 @@ export default function makeFetcher(query, accumulator, token) {
         "Content-Type": "application/json"
       }
     })
-      .then(res => res.json())
-      .then(data => {
-        return accumulator(results, data).then(merged => {
-          const { hasNextPage, endCursor } = merged.pageInfo || {};
-          if (hasNextPage) {
-            return recursiveFetch(
-              {
-                ...variables,
-                endCursor
-              },
-              merged.results
-            );
-          }
-          return merged.results;
-        });
-      });
-  };
+    .then(res => res.json());
 }

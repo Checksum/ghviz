@@ -4,10 +4,11 @@ import * as fp from "lodash/fp";
 
 import makeFetcher from "../Api";
 import visualization from "./Visualization";
+import { SideSheet, Paragraph } from "evergreen-ui";
 
-const orgLanguages = `
+const languagesQuery = `
 query($org: String!, $count: Int = 100, $endCursor: String) {
-  organization(login: $org) {
+  repositoryOwner(login: $org) {
     repositories(first: $count, after: $endCursor) {
       totalCount
       pageInfo {
@@ -30,7 +31,7 @@ query($org: String!, $count: Int = 100, $endCursor: String) {
 `;
 
 function processResponse(languageSet, data) {
-  const repos = _.get(data, "data.organization.repositories.nodes", []);
+  const repos = _.get(data, "data.repositoryOwner.repositories.nodes", []);
   if (repos.length === 0) {
     throw new Error("No repos found or insufficient permission");
   }
@@ -90,12 +91,18 @@ function processResponse(languageSet, data) {
 class ChordDiagram extends React.Component {
   node = null;
   state = {
-    languageSet: {}
+    languageSet: {},
+    selectedIndex: -1,
+    showDetails: false
   };
 
   constructor(props) {
     super(props);
-    this.fetcher = makeFetcher(orgLanguages, this.onFetchStep, props.token);
+    this.fetcher = makeFetcher({
+      query: languagesQuery,
+      accumulator: this.onFetchStep,
+      token: props.token
+    });
   }
 
   componentDidMount() {
@@ -130,7 +137,7 @@ class ChordDiagram extends React.Component {
 
         resolve({
           results: stepResults,
-          pageInfo: _.get(data, "data.organization.repositories.pageInfo")
+          pageInfo: _.get(data, "data.repositoryOwner.repositories.pageInfo")
         });
       } catch (error) {
         reject(error);
@@ -242,11 +249,19 @@ class ChordDiagram extends React.Component {
     group
       .on("mouseover", section => {
         connections.style("visibility", d =>
-          d.source.index === section.index ? "visible" : "hidden"
+          d.source.index === section.index || d.target.index === section.index
+            ? "visible"
+            : "hidden"
         );
       })
       .on("mouseout", d => {
         connections.style("visibility", "visible");
+      })
+      .on("click", section => {
+        this.setState(prevState => ({
+          selectedIndex: section.index,
+          showDetails: true
+        }));
       });
   }
 
@@ -260,16 +275,39 @@ class ChordDiagram extends React.Component {
     }
 
     return (
-      <svg
-        ref={node => (this.node = d3.select(node))}
-        viewBox={[-width / 2, -height / 2, width, height].join(" ")}
-        fontSize="10px"
-        fontFamily="sans-serif"
-        width={width + "px"}
-        height={height + "px"}
-      />
+      <>
+        <svg
+          ref={node => (this.node = d3.select(node))}
+          viewBox={[-width / 2, -height / 2, width, height].join(" ")}
+          fontSize="10px"
+          fontFamily="sans-serif"
+          width={width + "px"}
+          height={height + "px"}
+        />
+        {this.state.showDetails && (
+          <LanguageDetails
+            selectedIndex={this.state.selectedIndex}
+            details={this.state.languageSet.nameByIndex.get(
+              this.state.selectedIndex
+            )}
+            onClose={() => {
+              this.setState({
+                showDetails: false
+              });
+            }}
+          />
+        )}
+      </>
     );
   }
 }
+
+const LanguageDetails = props => {
+  return (
+    <SideSheet isShown={true} onCloseComplete={props.onClose}>
+      <Paragraph>{JSON.stringify(props)}</Paragraph>
+    </SideSheet>
+  );
+};
 
 export default visualization(ChordDiagram);

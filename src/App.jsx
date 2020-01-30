@@ -10,7 +10,7 @@ function App() {
 
   return (
     <Router>
-      <Layout>
+      <Layout token={token} setToken={setToken}>
         <Route
           path="/"
           exact

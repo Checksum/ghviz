@@ -7,13 +7,14 @@ import makeFetcher from "../Api";
 import visualization from "./Visualization";
 
 const orgHierarchy = `
-query($org: String!) {
+query($org: String!, $endCursor: String) {
   rateLimit {
     remaining
   }
 
   organization(login: $org) {
-    teams(first: 100) {
+    teams(first: 100, after: $endCursor) {
+      totalCount
       pageInfo {
         hasNextPage
         endCursor
@@ -32,11 +33,11 @@ query($org: String!) {
             avatarUrl
           }
         }
-        childTeams(first: 100) {
-          nodes {
-            name
-          }
-        }
+        # childTeams(first: 100) {
+        #  nodes {
+        #     name
+        #   }
+        # }
         ancestors(first: 100) {
           nodes {
             name
@@ -109,7 +110,11 @@ class HierarchyDiagram extends React.Component {
 
   constructor(props) {
     super(props);
-    this.fetcher = makeFetcher(orgHierarchy, this.onFetchStep, props.token);
+    this.fetcher = makeFetcher({
+      query: orgHierarchy,
+      accumulator: this.onFetchStep,
+      token: props.token
+    });
   }
 
   componentDidMount() {
@@ -141,7 +146,8 @@ class HierarchyDiagram extends React.Component {
       try {
         const stepResults = processResponse(acc, data);
         resolve({
-          results: stepResults
+          results: stepResults,
+          pageInfo: _.get(data, "data.organization.teams.pageInfo")
         });
       } catch (error) {
         reject(error);
