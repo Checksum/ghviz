@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Pane, Avatar, Heading } from "evergreen-ui";
+import { Pane, Avatar, Heading } from "../../lib/vendor";
 
 import { fetch } from "../Api";
 import TokenModal from "./TokenModal";
@@ -17,14 +17,14 @@ query {
 export default ({ children, token, setToken }) => {
   const [viewer, setViewer] = useState({});
   useEffect(() => {
-    if (viewer.login) {
+    if (viewer.login || !token) {
       return;
     }
     fetch({ query: viewerQuery, token })
-      .then(res => {
-        setViewer(_old => res.data.viewer);
+      .then((res) => {
+        setViewer((_old) => res.data.viewer);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
       });
   }, [viewer]);

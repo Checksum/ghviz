@@ -7,8 +7,8 @@ import {
   Pane,
   Heading,
   Text,
-  Icon
-} from "evergreen-ui";
+  Icon,
+} from "../../lib/vendor";
 
 import { fetch } from "../Api";
 import HierarchyDiagram from "../viz/HierarchyDiagram";
@@ -22,20 +22,20 @@ const TABS = [
         Hover over a language to see other languages it is frequently used with
       </Text>
     ),
-    component: ChordDiagram
+    component: ChordDiagram,
   },
   {
     name: "teams",
     description: <Text>Click on a team to see its members</Text>,
     component: HierarchyDiagram,
-    filter: ({ type }) => type === "Organization"
+    filter: ({ type }) => type === "Organization",
   },
   {
     name: "repos",
     description: <Text>Repositories that you </Text>,
     component: () => <div>Repositories</div>,
-    filter: ({ type }) => type === "Organization"
-  }
+    filter: ({ type }) => type === "Organization",
+  },
 ];
 
 const ownerQuery = `
@@ -52,33 +52,33 @@ export default class Home extends React.PureComponent {
     org: "",
     type: "",
     selectedIndex: 0,
-    visitedTabs: new Set([0])
+    visitedTabs: new Set([0]),
   };
 
   selectTab(index) {
     this.setState(({ visitedTabs }) => ({
       selectedIndex: index,
-      visitedTabs: visitedTabs.add(index)
+      visitedTabs: visitedTabs.add(index),
     }));
   }
 
-  onOrgChange = e => {
+  onOrgChange = (e) => {
     const owner = e.target.value;
     if (e.key === "Enter" && owner) {
       fetch({
         query: ownerQuery,
         token: this.props.token,
-        variables: { owner }
-      }).then(res => {
+        variables: { owner },
+      }).then((res) => {
         const type = res.data.repositoryOwner.__typename;
-        this.setState(prevState => {
+        this.setState((prevState) => {
           const selectedIndex =
             prevState.type === type ? prevState.selectedIndex : 0;
           return {
             org: owner,
             type,
             visitedTabs: new Set([selectedIndex]),
-            selectedIndex: selectedIndex
+            selectedIndex: selectedIndex,
           };
         });
       });
@@ -122,7 +122,7 @@ export default class Home extends React.PureComponent {
                 style={{
                   padding: "24px",
                   fontSize: "0.8em",
-                  textTransform: "uppercase"
+                  textTransform: "uppercase",
                 }}
                 disabled={tab.filter ? !tab.filter(this.state) : false}
               >

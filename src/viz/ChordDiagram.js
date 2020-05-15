@@ -4,7 +4,7 @@ import * as fp from "lodash/fp";
 
 import makeFetcher from "../Api";
 import visualization from "./Visualization";
-import { SideSheet, Paragraph } from "evergreen-ui";
+import { SideSheet, Paragraph } from "../../lib/vendor";
 
 const languagesQuery = `
 query($org: String!, $count: Int = 100, $endCursor: String) {
@@ -42,11 +42,11 @@ function processResponse(languageSet, data) {
       let {
         indexByName = new Map(),
         nameByIndex = new Map(),
-        matrix = []
+        matrix = [],
       } = acc;
       let n = matrix.length;
 
-      languages.forEach(lang => {
+      languages.forEach((lang) => {
         if (!indexByName.has(lang.name)) {
           nameByIndex.set(n, lang);
           indexByName.set(lang.name, n++);
@@ -56,18 +56,18 @@ function processResponse(languageSet, data) {
       // since new languages could've been added in this
       // reduce step (which means n would've increased),
       // pad the existing matrix entries with 0's upto n
-      matrix = matrix.map(row =>
+      matrix = matrix.map((row) =>
         row.length < n
           ? [
               ...row,
               ...Array.from({
-                length: n - row.length
-              }).fill(0)
+                length: n - row.length,
+              }).fill(0),
             ]
           : row
       );
 
-      languages.forEach(lang => {
+      languages.forEach((lang) => {
         const source = indexByName.get(lang.name);
         let row = matrix[source];
         if (!row) {
@@ -75,14 +75,14 @@ function processResponse(languageSet, data) {
         }
 
         languages
-          .filter(l => l.name != lang.name)
-          .forEach(target => row[indexByName.get(target.name)]++);
+          .filter((l) => l.name != lang.name)
+          .forEach((target) => row[indexByName.get(target.name)]++);
       });
 
       return {
         indexByName,
         nameByIndex,
-        matrix
+        matrix,
       };
     }, languageSet)
   )(repos);
@@ -93,7 +93,7 @@ class ChordDiagram extends React.Component {
   state = {
     languageSet: {},
     selectedIndex: -1,
-    showDetails: false
+    showDetails: false,
   };
 
   constructor(props) {
@@ -101,7 +101,7 @@ class ChordDiagram extends React.Component {
     this.fetcher = makeFetcher({
       query: languagesQuery,
       accumulator: this.onFetchStep,
-      token: props.token
+      token: props.token,
     });
   }
 
@@ -122,7 +122,7 @@ class ChordDiagram extends React.Component {
       .fetch(() =>
         this.fetcher({ org: this.props.org }, this.state.languageSet)
       )
-      .then(languageSet => {
+      .then((languageSet) => {
         if (languageSet) {
           this.onFetchEnd(languageSet);
         }
@@ -137,7 +137,7 @@ class ChordDiagram extends React.Component {
 
         resolve({
           results: stepResults,
-          pageInfo: _.get(data, "data.repositoryOwner.repositories.pageInfo")
+          pageInfo: _.get(data, "data.repositoryOwner.repositories.pageInfo"),
         });
       } catch (error) {
         reject(error);
@@ -145,10 +145,10 @@ class ChordDiagram extends React.Component {
     });
   };
 
-  onFetchEnd = languageSet => {
+  onFetchEnd = (languageSet) => {
     this.setState(
       {
-        languageSet
+        languageSet,
       },
       () => {
         this.draw(languageSet);
@@ -196,35 +196,31 @@ class ChordDiagram extends React.Component {
 
     svg.selectAll("*").remove();
 
-    const group = svg
-      .append("g")
-      .selectAll("g")
-      .data(chords.groups)
-      .join("g");
+    const group = svg.append("g").selectAll("g").data(chords.groups).join("g");
 
     group
       .append("path")
-      .attr("fill", d => data.nameByIndex.get(d.index).color)
-      .attr("stroke", d => data.nameByIndex.get(d.index).color)
+      .attr("fill", (d) => data.nameByIndex.get(d.index).color)
+      .attr("stroke", (d) => data.nameByIndex.get(d.index).color)
       // .attr("stroke", d => color(d.index))
       .attr("d", arc);
 
     group
       .append("text")
-      .each(d => {
+      .each((d) => {
         d.angle = (d.startAngle + d.endAngle) / 2;
       })
       .attr("dy", ".35em")
       .attr(
         "transform",
-        d => `
+        (d) => `
           rotate(${(d.angle * 180) / Math.PI - 90})
           translate(${innerRadius + 26})
           ${d.angle > Math.PI ? "rotate(180)" : ""}
         `
       )
-      .attr("text-anchor", d => (d.angle > Math.PI ? "end" : null))
-      .text(d => data.nameByIndex.get(d.index).name);
+      .attr("text-anchor", (d) => (d.angle > Math.PI ? "end" : null))
+      .text((d) => data.nameByIndex.get(d.index).name);
 
     const connections = svg
       .append("g")
@@ -236,10 +232,10 @@ class ChordDiagram extends React.Component {
     connections
       .attr(
         "stroke",
-        d => d3.rgb(data.nameByIndex.get(d.source.index).color).darker()
+        (d) => d3.rgb(data.nameByIndex.get(d.source.index).color).darker()
         // d3.rgb(color(d.source.index)).darker()
       )
-      .attr("fill", d => data.nameByIndex.get(d.source.index).color)
+      .attr("fill", (d) => data.nameByIndex.get(d.source.index).color)
       // .attr("stroke", d =>
       //   d3.rgb(color(d.source.index)).darker()
       // )
@@ -247,20 +243,20 @@ class ChordDiagram extends React.Component {
       .attr("d", ribbon);
 
     group
-      .on("mouseover", section => {
-        connections.style("visibility", d =>
+      .on("mouseover", (section) => {
+        connections.style("visibility", (d) =>
           d.source.index === section.index || d.target.index === section.index
             ? "visible"
             : "hidden"
         );
       })
-      .on("mouseout", d => {
+      .on("mouseout", (d) => {
         connections.style("visibility", "visible");
       })
-      .on("click", section => {
-        this.setState(prevState => ({
+      .on("click", (section) => {
+        this.setState((prevState) => ({
           selectedIndex: section.index,
-          showDetails: true
+          showDetails: true,
         }));
       });
   }
@@ -277,7 +273,7 @@ class ChordDiagram extends React.Component {
     return (
       <>
         <svg
-          ref={node => (this.node = d3.select(node))}
+          ref={(node) => (this.node = d3.select(node))}
           viewBox={[-width / 2, -height / 2, width, height].join(" ")}
           fontSize="10px"
           fontFamily="sans-serif"
@@ -292,7 +288,7 @@ class ChordDiagram extends React.Component {
             )}
             onClose={() => {
               this.setState({
-                showDetails: false
+                showDetails: false,
               });
             }}
           />
@@ -302,7 +298,7 @@ class ChordDiagram extends React.Component {
   }
 }
 
-const LanguageDetails = props => {
+const LanguageDetails = (props) => {
   return (
     <SideSheet isShown={true} onCloseComplete={props.onClose}>
       <Paragraph>{JSON.stringify(props)}</Paragraph>

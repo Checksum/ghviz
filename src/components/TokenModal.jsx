@@ -1,11 +1,11 @@
 import React from "react";
-import { Dialog, TextInputField } from "evergreen-ui";
+import { Dialog, TextInputField } from "../../lib/vendor";
 
 export default function TokenModal({ setToken }) {
   const [token, onTokenChange] = React.useState("");
   const [cancelled, setCancelled] = React.useState(false);
 
-  const onOk = e => {
+  const onOk = (e) => {
     e && e.preventDefault();
     if (token) {
       setCancelled(false);
@@ -40,7 +40,7 @@ export default function TokenModal({ setToken }) {
       <form onSubmit={onOk}>
         <TextInputField
           label="Personal access token"
-          onChange={e => onTokenChange(e.currentTarget.value)}
+          onChange={(e) => onTokenChange(e.currentTarget.value)}
           required
           isInvalid={cancelled && !token}
           validationMessage={

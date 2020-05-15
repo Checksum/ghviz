@@ -1,7 +1,7 @@
 import React from "react";
 import * as _ from "lodash";
 import * as fp from "lodash/fp";
-import { Position, Pane, Popover } from "evergreen-ui";
+import { Position, Pane, Popover } from "../../lib/vendor";
 
 import makeFetcher from "../Api";
 import visualization from "./Visualization";
@@ -65,11 +65,11 @@ function processResponse(resultSet, data) {
       }
       const entry = {
         id: team.name,
-        members: team.members.nodes.map(member => ({
+        members: team.members.nodes.map((member) => ({
           ...member,
           id: member.name || member.login,
-          parents: [team.name]
-        }))
+          parents: [team.name],
+        })),
       };
       if (level > 0) {
         entry.parents = [ancestors[ancestors.length - 1].name];
@@ -105,7 +105,7 @@ function processResponse(resultSet, data) {
 class HierarchyDiagram extends React.Component {
   state = {
     resultSet: [],
-    filtered: {}
+    filtered: {},
   };
 
   constructor(props) {
@@ -113,7 +113,7 @@ class HierarchyDiagram extends React.Component {
     this.fetcher = makeFetcher({
       query: orgHierarchy,
       accumulator: this.onFetchStep,
-      token: props.token
+      token: props.token,
     });
   }
 
@@ -134,7 +134,7 @@ class HierarchyDiagram extends React.Component {
   fetch = () => {
     return this.props
       .fetch(() => this.fetcher({ org: this.props.org }, []))
-      .then(resultSet => {
+      .then((resultSet) => {
         if (resultSet) {
           this.onFetchEnd(resultSet);
         }
@@ -147,7 +147,7 @@ class HierarchyDiagram extends React.Component {
         const stepResults = processResponse(acc, data);
         resolve({
           results: stepResults,
-          pageInfo: _.get(data, "data.organization.teams.pageInfo")
+          pageInfo: _.get(data, "data.organization.teams.pageInfo"),
         });
       } catch (error) {
         reject(error);
@@ -155,39 +155,39 @@ class HierarchyDiagram extends React.Component {
     });
   };
 
-  onFetchEnd = resultSet => {
+  onFetchEnd = (resultSet) => {
     this.setState({
       resultSet,
-      filtered: HierarchyDiagram.build(resultSet, this.props.d3)
+      filtered: HierarchyDiagram.build(resultSet, this.props.d3),
     });
   };
 
   static build(data, d3) {
     let levels = _.cloneDeep(data);
     // precompute level depth
-    levels.forEach((l, i) => l.forEach(n => (n.level = i)));
+    levels.forEach((l, i) => l.forEach((n) => (n.level = i)));
 
     const nodes = levels.reduce((a, x) => a.concat(x), []);
     const nodes_index = {};
-    nodes.forEach(d => (nodes_index[d.id] = d));
+    nodes.forEach((d) => (nodes_index[d.id] = d));
 
     // objectification
-    nodes.forEach(d => {
+    nodes.forEach((d) => {
       d.parents = (d.parents === undefined ? [] : d.parents).map(
-        p => nodes_index[p]
+        (p) => nodes_index[p]
       );
     });
 
     // precompute bundles
     levels.forEach((l, i) => {
       var index = {};
-      l.forEach(n => {
+      l.forEach((n) => {
         if (n.parents.length == 0) {
           return;
         }
 
         var id = n.parents
-          .map(d => d.id)
+          .map((d) => d.id)
           .sort()
           .join("--");
         if (id in index) {
@@ -196,22 +196,22 @@ class HierarchyDiagram extends React.Component {
           index[id] = {
             id: id,
             parents: n.parents.slice(),
-            level: i
+            level: i,
           };
         }
         n.bundle = index[id];
       });
-      l.bundles = Object.keys(index).map(k => index[k]);
+      l.bundles = Object.keys(index).map((k) => index[k]);
       l.bundles.forEach((b, i) => (b.i = i));
     });
 
     const links = [];
-    nodes.forEach(d => {
-      d.parents.forEach(p =>
+    nodes.forEach((d) => {
+      d.parents.forEach((p) =>
         links.push({
           source: d,
           bundle: d.bundle,
-          target: p
+          target: p,
         })
       );
     });
@@ -219,8 +219,8 @@ class HierarchyDiagram extends React.Component {
     const bundles = levels.reduce((a, x) => a.concat(x.bundles), []);
 
     // reverse pointer from parent to bundles
-    bundles.forEach(b =>
-      b.parents.forEach(p => {
+    bundles.forEach((b) =>
+      b.parents.forEach((p) => {
         if (p.bundles_index === undefined) {
           p.bundles_index = {};
         }
@@ -231,9 +231,9 @@ class HierarchyDiagram extends React.Component {
       })
     );
 
-    nodes.forEach(n => {
+    nodes.forEach((n) => {
       if (n.bundles_index !== undefined) {
-        n.bundles = Object.keys(n.bundles_index).map(k => n.bundles_index[k]);
+        n.bundles = Object.keys(n.bundles_index).map((k) => n.bundles_index[k]);
       } else {
         n.bundles_index = {};
         n.bundles = [];
@@ -241,7 +241,7 @@ class HierarchyDiagram extends React.Component {
       n.bundles.forEach((b, i) => (b.i = i));
     });
 
-    links.forEach(l => {
+    links.forEach((l) => {
       if (l.bundle.links === undefined) {
         l.bundle.links = [];
       }
@@ -259,12 +259,12 @@ class HierarchyDiagram extends React.Component {
     const min_family_height = 16;
 
     nodes.forEach(
-      n => (n.height = (Math.max(1, n.bundles.length) - 1) * metro_d)
+      (n) => (n.height = (Math.max(1, n.bundles.length) - 1) * metro_d)
     );
 
     let x_offset = padding;
     let y_offset = padding;
-    levels.forEach(l => {
+    levels.forEach((l) => {
       x_offset += l.bundles.length * bundle_width;
       y_offset += level_y_padding;
       l.forEach((n, i) => {
@@ -276,8 +276,8 @@ class HierarchyDiagram extends React.Component {
     });
 
     let i = 0;
-    levels.forEach(l => {
-      l.bundles.forEach(b => {
+    levels.forEach((l) => {
+      l.bundles.forEach((b) => {
         b.x =
           b.parents[0].x +
           node_width +
@@ -287,7 +287,7 @@ class HierarchyDiagram extends React.Component {
       i += l.length;
     });
 
-    links.forEach(l => {
+    links.forEach((l) => {
       l.xt = l.target.x;
       l.yt =
         l.target.y +
@@ -301,17 +301,17 @@ class HierarchyDiagram extends React.Component {
 
     // compress vertical space
     let y_negative_offset = 0;
-    levels.forEach(l => {
+    levels.forEach((l) => {
       y_negative_offset +=
         -min_family_height +
-          d3.min(l.bundles, b =>
-            d3.min(b.links, link => link.ys - c - (link.yt + c))
+          d3.min(l.bundles, (b) =>
+            d3.min(b.links, (link) => link.ys - c - (link.yt + c))
           ) || 0;
-      l.forEach(n => (n.y -= y_negative_offset));
+      l.forEach((n) => (n.y -= y_negative_offset));
     });
 
     // very ugly, I know
-    links.forEach(l => {
+    links.forEach((l) => {
       l.yt =
         l.target.y +
         l.target.bundles_index[l.bundle.id].i * metro_d -
@@ -323,13 +323,13 @@ class HierarchyDiagram extends React.Component {
     });
 
     const layout = {
-      height: d3.max(nodes, n => n.y) + node_height / 2 + 2 * padding,
-      width: d3.max(nodes, n => n.x) + node_width / 2 + 2 * padding,
+      height: d3.max(nodes, (n) => n.y) + node_height / 2 + 2 * padding,
+      width: d3.max(nodes, (n) => n.x) + node_width / 2 + 2 * padding,
       node_height,
       node_width,
       bundle_width,
       level_y_padding,
-      metro_d
+      metro_d,
     };
 
     return {
@@ -337,13 +337,13 @@ class HierarchyDiagram extends React.Component {
       nodes_index,
       links,
       bundles,
-      layout
+      layout,
     };
   }
 
-  setFilteredNodes = nodes => {
+  setFilteredNodes = (nodes) => {
     this.setState({
-      filtered: HierarchyDiagram.build(nodes, this.props.d3)
+      filtered: HierarchyDiagram.build(nodes, this.props.d3),
     });
   };
 
@@ -385,10 +385,10 @@ class HierarchyDiagram extends React.Component {
         className="hierarchy-diagram"
         onClick={this.resetFilter}
       >
-        {bundles.map(b => {
+        {bundles.map((b) => {
           const d = b.links
             .map(
-              l => `
+              (l) => `
             M${l.xt} ${l.yt}
             L${l.xb - l.c1} ${l.yt}
             A${l.c1} ${l.c1} 90 0 1 ${l.xb} ${l.yt + l.c1}
@@ -418,7 +418,7 @@ class HierarchyDiagram extends React.Component {
           );
         })}
 
-        {nodes.map(n => (
+        {nodes.map((n) => (
           <>
             <circle
               className="node"
@@ -446,7 +446,7 @@ class HierarchyDiagram extends React.Component {
               >
                 {({ toggle, getRef }) => (
                   <text
-                    ref={el => getRef(el)}
+                    ref={(el) => getRef(el)}
                     onMouseEnter={toggle}
                     onMouseLeave={toggle}
                     x={n.x + 4}
@@ -461,7 +461,7 @@ class HierarchyDiagram extends React.Component {
                 x={n.x + 4}
                 y={n.y - n.height / 2 - 4}
                 // stroke={n.members.length > 0 ? color(n.id) : "none"}
-                onClick={e => this.filterByNode(e, n)}
+                onClick={(e) => this.filterByNode(e, n)}
               >
                 {n.id}
               </text>

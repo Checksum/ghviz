@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Pane } from "evergreen-ui";
+import { Alert, Pane } from "../../lib/vendor";
 
 export default function visualization(WrappedComponent) {
   class Visualization extends React.PureComponent {
@@ -7,7 +7,7 @@ export default function visualization(WrappedComponent) {
       loading: false,
       ready: true,
       error: null,
-      d3: null
+      d3: null,
     };
 
     constructor(props) {
@@ -16,12 +16,12 @@ export default function visualization(WrappedComponent) {
         setLoading: this.setLoading,
         resetError: this.resetError,
         onError: this.onError,
-        fetch: this.fetch
+        fetch: this.fetch,
       });
     }
 
     componentDidMount() {
-      import("../../lib/d3").then(d3 => {
+      import("../../lib/d3").then((d3) => {
         this.setState({ d3 });
       });
     }
@@ -36,14 +36,14 @@ export default function visualization(WrappedComponent) {
       this.onError(error);
     }
 
-    onError = error => {
+    onError = (error) => {
       console.error(error);
       this.setState({
-        error
+        error,
       });
     };
 
-    setLoading = loading => {
+    setLoading = (loading) => {
       this.setState({ loading });
     };
 
@@ -51,11 +51,11 @@ export default function visualization(WrappedComponent) {
       this.setState({ error: null });
     };
 
-    fetch = fetcher => {
+    fetch = (fetcher) => {
       this.resetError();
       this.setLoading(true);
       return fetcher()
-        .then(res => {
+        .then((res) => {
           this.setLoading(false);
           return res;
         })
@@ -96,7 +96,7 @@ export default function visualization(WrappedComponent) {
                 left: 0,
                 right: 0,
                 background: "rgba(0, 0, 0, 0.15)",
-                zIndex: 10
+                zIndex: 10,
               }}
             >
               <div className="spinner" style={{ top: "-10%" }}>
@@ -109,7 +109,7 @@ export default function visualization(WrappedComponent) {
             ...this.props,
             d3,
             loading,
-            error
+            error,
           })}
         </>
       );
