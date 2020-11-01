@@ -1,5 +1,5 @@
 import React from "react";
-import { get } from "lodash";
+import get from "lodash/get";
 
 import makeFetcher from "../Api";
 import visualization from "./Visualization";

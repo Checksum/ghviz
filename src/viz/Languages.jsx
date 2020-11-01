@@ -1,6 +1,8 @@
 import React from "react";
-import * as _ from "lodash";
-import * as fp from "lodash/fp";
+import get from "lodash/get";
+import flow from "lodash/fp/flow";
+import map from "lodash/fp/map";
+import reduce from "lodash/fp/reduce";
 
 import makeFetcher from "../Api";
 import visualization from "./Visualization";
@@ -31,14 +33,14 @@ query($org: String!, $count: Int = 100, $endCursor: String) {
 `;
 
 function processResponse(languageSet, data) {
-  const repos = _.get(data, "data.repositoryOwner.repositories.nodes", []);
+  const repos = get(data, "data.repositoryOwner.repositories.nodes", []);
   if (repos.length === 0) {
     throw new Error("No repos found or insufficient permission");
   }
 
-  return fp.flow(
-    fp.map("languages.nodes"),
-    fp.reduce((acc, languages) => {
+  return flow(
+    map("languages.nodes"),
+    reduce((acc, languages) => {
       let {
         indexByName = new Map(),
         nameByIndex = new Map(),
@@ -137,7 +139,7 @@ class ChordDiagram extends React.Component {
 
         resolve({
           results: stepResults,
-          pageInfo: _.get(data, "data.repositoryOwner.repositories.pageInfo"),
+          pageInfo: get(data, "data.repositoryOwner.repositories.pageInfo"),
         });
       } catch (error) {
         reject(error);

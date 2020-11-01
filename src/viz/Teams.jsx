@@ -1,6 +1,8 @@
 import React from "react";
-import * as _ from "lodash";
-import * as fp from "lodash/fp";
+import get from "lodash/get";
+import cloneDeep from "lodash/cloneDeep";
+import flow from "lodash/fp/flow";
+import reduce from "lodash/fp/reduce";
 import { Position, Pane, Popover } from "../../lib/vendor";
 
 import makeFetcher from "../Api";
@@ -50,13 +52,13 @@ query($org: String!, $endCursor: String) {
 `;
 
 function processResponse(resultSet, data) {
-  const teams = _.get(data, "data.organization.teams.nodes", []);
+  const teams = get(data, "data.organization.teams.nodes", []);
   if (teams.length === 0) {
     throw new Error("No teams found or insufficient permission");
   }
 
-  let levels = fp.flow(
-    fp.reduce((acc, team) => {
+  let levels = flow(
+    reduce((acc, team) => {
       const ancestors = team.ancestors.nodes;
       const level = ancestors.length;
 
@@ -147,7 +149,7 @@ class HierarchyDiagram extends React.Component {
         const stepResults = processResponse(acc, data);
         resolve({
           results: stepResults,
-          pageInfo: _.get(data, "data.organization.teams.pageInfo"),
+          pageInfo: get(data, "data.organization.teams.pageInfo"),
         });
       } catch (error) {
         reject(error);
@@ -163,7 +165,7 @@ class HierarchyDiagram extends React.Component {
   };
 
   static build(data, d3) {
-    let levels = _.cloneDeep(data);
+    let levels = cloneDeep(data);
     // precompute level depth
     levels.forEach((l, i) => l.forEach((n) => (n.level = i)));
 

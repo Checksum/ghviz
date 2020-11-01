@@ -1,5 +1,5 @@
 import React from "react";
-import * as _ from "lodash";
+import capitalize from "lodash/capitalize";
 import {
   SearchInput,
   Tablist,
@@ -7,7 +7,8 @@ import {
   Pane,
   Heading,
   Text,
-  OfficeIcon, UserIcon
+  OfficeIcon,
+  UserIcon,
 } from "../../lib/vendor";
 
 import { fetch } from "../Api";
@@ -110,10 +111,11 @@ export default class Home extends React.PureComponent {
             required
             onKeyDown={this.onOrgChange}
           />
-          {type && type === 'Organization'
-            ? <OfficeIcon size={24} style={{ marginLeft: "10px" }} />
-            : <UserIcon size={24} style={{ marginLeft: "10px" }} />
-          }
+          {type && type === "Organization" ? (
+            <OfficeIcon size={24} style={{ marginLeft: "10px" }} />
+          ) : (
+            <UserIcon size={24} style={{ marginLeft: "10px" }} />
+          )}
         </Pane>
         <Pane display="flex" flex="1">
           <Tablist flexBasis={240}>
@@ -131,7 +133,7 @@ export default class Home extends React.PureComponent {
                 }}
                 disabled={tab.filter ? !tab.filter(this.state) : false}
               >
-                {_.capitalize(tab.name)}
+                {capitalize(tab.name)}
               </SidebarTab>
             ))}
           </Tablist>
@@ -148,7 +150,7 @@ export default class Home extends React.PureComponent {
                 paddingX={24}
               >
                 <Pane paddingY={16} style={{ textAlign: "left" }}>
-                  <Heading size={600}>{_.capitalize(tab.name)}</Heading>
+                  <Heading size={600}>{capitalize(tab.name)}</Heading>
                   {tab.description || null}
                 </Pane>
                 {org &&

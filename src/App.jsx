@@ -14,7 +14,7 @@ function App() {
         <Route
           path="/"
           exact
-          render={props => (
+          render={(props) => (
             <Home {...props} token={token} setToken={setToken} />
           )}
         />
