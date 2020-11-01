@@ -1,3 +1,4 @@
+import "./style.css";
 import "../lib/vendor";
 
 import React from "react";

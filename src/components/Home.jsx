@@ -7,14 +7,19 @@ import {
   Pane,
   Heading,
   Text,
-  Icon,
+  OfficeIcon, UserIcon
 } from "../../lib/vendor";
 
 import { fetch } from "../Api";
-import HierarchyDiagram from "../viz/HierarchyDiagram";
-import ChordDiagram from "../viz/ChordDiagram";
+import Teams from "../viz/Teams";
+import Languages from "../viz/Languages";
 
 const TABS = [
+  {
+    name: "stars",
+    description: <Text>Your GitHub stars</Text>,
+    component: () => <div>Stars</div>,
+  },
   {
     name: "languages",
     description: (
@@ -22,12 +27,12 @@ const TABS = [
         Hover over a language to see other languages it is frequently used with
       </Text>
     ),
-    component: ChordDiagram,
+    component: Languages,
   },
   {
     name: "teams",
     description: <Text>Click on a team to see its members</Text>,
-    component: HierarchyDiagram,
+    component: Teams,
     filter: ({ type }) => type === "Organization",
   },
   {
@@ -88,7 +93,6 @@ export default class Home extends React.PureComponent {
   render() {
     const { org, selectedIndex, visitedTabs, type } = this.state;
     const { token } = this.props;
-    const icon = type && (type === "Organization" ? "office" : "user");
 
     return (
       <>
@@ -106,9 +110,10 @@ export default class Home extends React.PureComponent {
             required
             onKeyDown={this.onOrgChange}
           />
-          {icon && (
-            <Icon icon={icon} size={24} style={{ marginLeft: "10px" }} />
-          )}
+          {type && type === 'Organization'
+            ? <OfficeIcon size={24} style={{ marginLeft: "10px" }} />
+            : <UserIcon size={24} style={{ marginLeft: "10px" }} />
+          }
         </Pane>
         <Pane display="flex" flex="1">
           <Tablist flexBasis={240}>
