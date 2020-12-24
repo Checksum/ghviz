@@ -16,8 +16,8 @@
     "evergreen-ui": "^5.1.2",
     "lodash": "^4.17.20",
     "normalize.css": "^8.0.1",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",
     "react-use": "^15.3.4",
     "venn.js": "^0.2.20"

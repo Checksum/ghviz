@@ -29,7 +29,7 @@ class ViewerStars extends React.Component {
   node = null;
   state = {
     languageSet: {},
-    selectedIndex: -1,
+    selectedIndex: 0,
     showDetails: false,
   };
 
@@ -74,7 +74,7 @@ class ViewerStars extends React.Component {
 
         resolve({
           results: stepResults,
-          pageInfo: _.get(data, "data.repositoryOwner.repositories.pageInfo"),
+          pageInfo: get(data, "data.repositoryOwner.repositories.pageInfo"),
         });
       } catch (error) {
         reject(error);
@@ -93,3 +93,5 @@ class ViewerStars extends React.Component {
     );
   };
 }
+
+export default visualization(ViewerStars);
