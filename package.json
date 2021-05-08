@@ -14,7 +14,7 @@
   "dependencies": {
     "d3": "^6.2.0",
     "evergreen-ui": "^5.1.2",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "normalize.css": "^8.0.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
