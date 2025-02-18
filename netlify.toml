@@ -1,7 +1,7 @@
 [build]
   base = "."
-  publish = "dist"
-  command = "yarn run build"
+  publish = "static"
+  command = "bun run build"
 
 [[redirects]]
   from = "/*"

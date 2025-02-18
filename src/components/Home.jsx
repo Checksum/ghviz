@@ -16,11 +16,11 @@ import Teams from "../viz/Teams";
 import Languages from "../viz/Languages";
 
 const TABS = [
-  {
-    name: "stars",
-    description: <Text>Your GitHub stars</Text>,
-    component: () => <div>Stars</div>,
-  },
+  // {
+  //   name: "stars",
+  //   description: <Text>Your GitHub stars</Text>,
+  //   component: () => <div>Stars</div>,
+  // },
   {
     name: "languages",
     description: (
@@ -36,12 +36,12 @@ const TABS = [
     component: Teams,
     filter: ({ type }) => type === "Organization",
   },
-  {
-    name: "repos",
-    description: <Text>Repositories that you </Text>,
-    component: () => <div>Repositories</div>,
-    filter: ({ type }) => type === "Organization",
-  },
+  // {
+  //   name: "repos",
+  //   description: <Text>Repositories that you </Text>,
+  //   component: () => <div>Repositories</div>,
+  //   filter: ({ type }) => type === "Organization",
+  // },
 ];
 
 const ownerQuery = `
@@ -55,8 +55,8 @@ query($owner: String!) {
 
 export default class Home extends React.PureComponent {
   state = {
-    org: "",
-    type: "",
+    org: "facebook",
+    type: "Organization",
     selectedIndex: 0,
     visitedTabs: new Set([0]),
   };
@@ -106,6 +106,7 @@ export default class Home extends React.PureComponent {
           <SearchInput
             name="org"
             placeholder="GitHub Organization or User"
+            defaultValue="facebook"
             width={360}
             height={48}
             required

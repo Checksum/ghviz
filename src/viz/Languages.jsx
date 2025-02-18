@@ -61,11 +61,11 @@ function processResponse(languageSet, data) {
       matrix = matrix.map((row) =>
         row.length < n
           ? [
-              ...row,
-              ...Array.from({
-                length: n - row.length,
-              }).fill(0),
-            ]
+            ...row,
+            ...Array.from({
+              length: n - row.length,
+            }).fill(0),
+          ]
           : row
       );
 
@@ -205,7 +205,8 @@ class ChordDiagram extends React.Component {
       .attr("fill", (d) => data.nameByIndex.get(d.index).color)
       .attr("stroke", (d) => data.nameByIndex.get(d.index).color)
       // .attr("stroke", d => color(d.index))
-      .attr("d", arc);
+      .attr("d", arc)
+      .attr("data-index", (d) => d.index);
 
     group
       .append("text")
@@ -222,7 +223,8 @@ class ChordDiagram extends React.Component {
         `
       )
       .attr("text-anchor", (d) => (d.angle > Math.PI ? "end" : null))
-      .text((d) => data.nameByIndex.get(d.index).name);
+      .text((d) => data.nameByIndex.get(d.index).name)
+      .attr("data-index", (d) => d.index);
 
     const connections = svg
       .append("g")
@@ -242,14 +244,17 @@ class ChordDiagram extends React.Component {
       //   d3.rgb(color(d.source.index)).darker()
       // )
       // .attr("fill", d => color(d.source.index))
-      .attr("d", ribbon);
+      .attr("d", ribbon)
+      .attr("data-index", (d) => d.index);
 
     group
       .on("mouseover", (section) => {
-        connections.style("visibility", (d) =>
-          d.source.index === section.index || d.target.index === section.index
+        const hoverIndex = parseInt(section.target.dataset.index, 10);
+        connections.style("visibility", (d) => {
+          return d.source.index === hoverIndex || d.target.index === hoverIndex
             ? "visible"
             : "hidden"
+        }
         );
       })
       .on("mouseout", (d) => {
@@ -257,7 +262,7 @@ class ChordDiagram extends React.Component {
       })
       .on("click", (section) => {
         this.setState((prevState) => ({
-          selectedIndex: section.index,
+          selectedIndex: section.target.dataset.index,
           showDetails: true,
         }));
       });
@@ -286,7 +291,7 @@ class ChordDiagram extends React.Component {
           <LanguageDetails
             selectedIndex={this.state.selectedIndex}
             details={this.state.languageSet.nameByIndex.get(
-              this.state.selectedIndex
+              +this.state.selectedIndex
             )}
             onClose={() => {
               this.setState({
@@ -304,6 +309,7 @@ const LanguageDetails = (props) => {
   return (
     <SideSheet isShown={true} onCloseComplete={props.onClose}>
       <Paragraph>{JSON.stringify(props)}</Paragraph>
+      <Paragraph>{JSON.stringify()}</Paragraph>
     </SideSheet>
   );
 };

@@ -28,18 +28,19 @@ export default function TokenModal({ setToken }) {
       shouldCloseOnEscapePress={false}
     >
       <p>
-        The app needs a personal access token for API requests. If you don't
+        The app needs a personal access token for GitHub GraphQL API requests. If you don't
         have a token, you can{" "}
         <a
           href="https://github.com/settings/tokens/new?description=ghviz&scopes=repo,read:org,read:discussion"
           target="_blank"
         >
           create one now
-        </a>
+        </a>. This token is only saved locally on this browser.
       </p>
       <form onSubmit={onOk}>
         <TextInputField
           label="Personal access token"
+          placeholder="githubh_pat_"
           onChange={(e) => onTokenChange(e.currentTarget.value)}
           required
           isInvalid={cancelled && !token}

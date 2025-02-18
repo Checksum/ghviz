@@ -2,15 +2,12 @@
   "name": "ghviz",
   "version": "0.1.0",
   "description": "Visualize and discover interesting GitHub repos",
-  "scripts": {
-    "start": "esbuild src/index.jsx --bundle --outdir=dist --target=es2015 '--define:process.env.NODE_ENV=\"development\"'",
-    "poststart": "yarn postbuild && python3 -m http.server --directory dist",
-    "prebuild": "rm -rf dist",
-    "build": "esbuild src/index.jsx --bundle --minify --outdir=dist --target=es2015 '--define:process.env.NODE_ENV=\"production\"'",
-    "postbuild": "cp src/index.html dist/"
-  },
   "author": "Srinath Sankar <srinath@iambot.net>",
   "license": "MIT",
+  "scripts": {
+    "start": "esbuild src/index.jsx --servedir=static --bundle --outdir=static --target=es2015 '--define:process.env.NODE_ENV=\"development\"'",
+    "build": "esbuild src/index.jsx --bundle --minify --outdir=static --target=es2015 '--define:process.env.NODE_ENV=\"production\"'"
+  },
   "dependencies": {
     "d3": "^6.2.0",
     "evergreen-ui": "^5.1.2",
@@ -23,6 +20,6 @@
     "venn.js": "^0.2.20"
   },
   "devDependencies": {
-    "esbuild": "^0.8.0"
+    "esbuild": "^0.25.0"
   }
 }

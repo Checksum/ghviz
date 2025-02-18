@@ -306,9 +306,9 @@ class HierarchyDiagram extends React.Component {
     levels.forEach((l) => {
       y_negative_offset +=
         -min_family_height +
-          d3.min(l.bundles, (b) =>
-            d3.min(b.links, (link) => link.ys - c - (link.yt + c))
-          ) || 0;
+        d3.min(l.bundles, (b) =>
+          d3.min(b.links, (link) => link.ys - c - (link.yt + c))
+        ) || 0;
       l.forEach((n) => (n.y -= y_negative_offset));
     });
 
